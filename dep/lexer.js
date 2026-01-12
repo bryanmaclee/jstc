@@ -2,7 +2,6 @@ import { Tokens, operator } from "./syntax.js";
 import { access } from "./lib.js";
 
 export function tokenize(src) {
-   console.log("this is in here");
    const tokens = [];
    let itter = 0;
    let startCol = 1;
@@ -17,43 +16,40 @@ export function tokenize(src) {
       itter++;
    }
 
-   function skippable(str) {
-      if (str === " " || str === "\t") {
-         return "s";
-      } else if (str === "\n" || str === "\r") {
-         return "l";
-      }
-      return false;
-   }
+   // function skippable(str) {
+   //    if (str === " " || str === "\t") {
+   //       return "s";
+   //    } else if (str === "\n" || str === "\r") {
+   //       return "l";
+   //    }
+   //    return false;
+   // }
 
-   function isKeyword(word) {
-      const kw = Tokens.keyword.map((w) => w.type);
-      return kw.includes(word);
-   }
+   // function isKeyword(word) {
+   //    const kw = Tokens.keyword.map((w) => w.type);
+   //    return kw.includes(word);
+   // }
 
-   function isAlpha(src) {
-      const rx = /[a-zA-Z_$]/;
-      return rx.test(src);
-   }
-
-   function isAlphaNum(src) {
-      const rx = /[a-zA-Z0-9_$]/;
-      return rx.test(src);
-   }
-
-   function isNum(src) {
-      const rx = /[0-9]/;
-      return rx.test(src);
-   }
-
+   // function isAlpha(src) {
+   //    return /[a-zA-Z_$]/.test(src);
+   // }
+   //
+   // function isAlphaNum(src) {
+   //    return /[a-zA-Z0-9_$]/.test(src);
+   // }
+   //
+   // function isNum(src) {
+   //    return /[0-9]/.test(src);
+   // }
+   //
    function c() {
       return src[itter];
    }
-
-   function addAndInc(val, tok) {
-      add(val, tok);
-      inc();
-   }
+   //
+   // function addAndInc(val, tok) {
+   //    add(val, tok);
+   //    inc();
+   // }
 
    function add(value, type, kind, addTok = true) {
       access.tokens.push({

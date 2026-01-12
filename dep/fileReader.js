@@ -30,7 +30,7 @@ async function readIn(filePath) {
    let lin = "";
    for (const char of src) {
       if (/\r\n|\r|\n/.test(char)) {
-         self.postMessage({ lin, done: false });
+         self.postMessage({ lin, num: lineNum++ });
          lin = "";
       } else {
          lin += char;

@@ -16,7 +16,7 @@ export async function addMsg(msg) {
    await appendFile("messages.txt", line);
 }
 
-// export const globalEnv = Environment();
+//  export const globalEnv = Environment();
 
 export function ditchWhite(str) {
    return str.filter((thing) => thing.kind !== "format");

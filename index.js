@@ -1,6 +1,8 @@
 import { truncateInput } from "./dep/lib.js";
 import { addMsg } from "./dep/lib.js";
-
+const str = "word word word";
+const reg = str.match(/^word/);
+console.log(reg);
 const fileReader = new Worker("./dep/fileReader.js");
 const syntax = new Worker("./dep/synAn.js");
 syntax.onerror = function (ev) {
@@ -62,10 +64,7 @@ async function streamFile(filePath) {
    fileReader.postMessage({ done: true });
 }
 
-// console.log(/[a-z]/.test("ac"));
-
 await getFile("./examp/test.s");
-// await streamFile("./examp/test.s");
 
 // read file by line
 // =========================================================
