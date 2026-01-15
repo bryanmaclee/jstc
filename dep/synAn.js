@@ -1,8 +1,8 @@
-import { addMsg } from "./lib.js";
+import { addMsg, Files } from "./lib.js";
 import { opers, keywords } from "./syntax.js";
 // import { tokenize } from "./lexer.js";
 
-self.onmessage = (msg) => {
+self.onmessage = async (msg) => {
    const lin = msg.data.lin;
    const linNum =
       msg.data.num < 10
@@ -17,7 +17,8 @@ self.onmessage = (msg) => {
       process.exit();
       return;
    }
-   procLine(lin);
+   // await bun. procLine(lin);
+   await Bun.write(Files.programFile, procLine(lin));
 };
 
 self.onerror = function (ev) {
@@ -29,7 +30,10 @@ const starters = new Set(["<:"]);
 const tokens = [];
 
 function procLine(lin) {
-   const src = lin.split("").reverse();
+   console.log(lin);
+   // const src = lin.split("").reverse();
+   const src = lin.split("");
+   console.log(src);
    let lineNum = 0;
    let spaces = "";
    let chunk = "";
@@ -39,11 +43,6 @@ function procLine(lin) {
    let line = 1;
    let tokenNumber = 0;
    let lineStartPos = 1;
-
-   function step() {
-      cursor++;
-      return src.pop();
-   }
 
    function c() {
       return src[itter];
@@ -78,6 +77,7 @@ function procLine(lin) {
          start_col: char - value.length,
          end_col: char - 1,
          token_num: addTok ? ++tokenNumber : null,
+         complete: false,
       });
    }
 
@@ -87,17 +87,27 @@ function procLine(lin) {
       chunk += c();
       if (isNum(chunk)) {
          inc();
-         while (itter < src.length && (isNum(c()) || c() === ".")) {
-            chunk += c();
+         while (
+            itter < src.length &&
+            (isNum(src[itter]) || src[itter] === ".")
+         ) {
+            chunk += src[itter];
             inc();
          }
          add(chunk, "number", "numeric_lit");
          continue;
-      } else if (isAlpha(c())) {
+      } else if (isAlpha(src[itter])) {
          inc();
-         while (itter < src.length && isAlphaNum(c())) {
-            chunk += c();
+         while (itter < src.length && isAlphaNum(src[itter])) {
+            chunk += src[itter];
             inc();
+         }
+         function revStr(str) {
+            let re = "";
+            for (const char of chunk) {
+               re = char + re;
+            }
+            return re;
          }
          if (isKeyword(chunk)) {
             add(chunk, "word", "keyword");
@@ -121,19 +131,19 @@ function procLine(lin) {
          if (chunk === '"' || chunk === "'") {
             let quoteType = chunk;
             while (c() !== quoteType) {
-               chunk += c();
+               chunk += src[itter];
                inc();
             }
-            chunk += c();
+            chunk += src[itter];
             inc();
             add(chunk, "string", "literal");
             continue;
          }
          while (itter < src.length && opers.has(chunk + c())) {
-            chunk += c();
+            chunk += src[itter];
             inc();
          }
-         add(chunk, "operator", opers.get(chunk));
+         add(chunk, "operator", chunk);
          continue;
       }
       console.error(
@@ -141,11 +151,12 @@ function procLine(lin) {
             char - chunk.length
          } position: ${itter}`,
       );
-      // return tokens;
-      console.log(tokens);
+      console.log("the tokens are: ", tokens);
    }
-   add("EOF", "EOF", "EOF");
+   // console.log(tokens);
    // return tokens;
+   add("EOF", "EOF", "EOF");
+   return tokens;
 }
 
 // while (linAr.length) {

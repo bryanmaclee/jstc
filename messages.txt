@@ -1,6 +1,4 @@
   1: const value = 5;
   2: double(value);
   3: function double(n){
-  4:    return n*2;
-  5: }
-  6: <:type>
+  4:    return <:> n*2;
