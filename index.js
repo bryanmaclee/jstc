@@ -1,26 +1,20 @@
 import { truncateInput } from "./dep/lib.js";
 import { addMsg } from "./dep/lib.js";
-const str = "word word word";
-const reg = str.match(/^word/);
-// console.log(reg);
+
 const fileReader = new Worker("./dep/fileReader.js");
 const syntax = new Worker("./dep/synAn.js");
-syntax.onerror = function (ev) {
-   console.error("worker error ", ev.message);
-   console.error("in file: ", ev.filename);
-   console.error("line: ", ev.lineno);
+const lexer = new Worker("./dep/lexicon.js");
+
+lexer.onmessage = function (ev) {
+   console.log(ev.data);
 };
 
 syntax.onmessage = function (ev) {
    if (ev.data.type === "error") {
       console.error("error from worker: ", ev.data.message);
    }
-};
-
-fileReader.onerror = function (ev) {
-   console.error("worker error ", ev.message);
-   console.error("in file: ", ev.filename);
-   console.error("line: ", ev.lineno);
+   // console.log("the val is: ", ev.data.value);
+   lexer.postMessage(ev.data);
 };
 
 fileReader.onmessage = function (ev) {
@@ -66,6 +60,17 @@ async function streamFile(filePath) {
 
 await getFile("./examp/test.s");
 
+fileReader.onerror = function (ev) {
+   console.error("worker error ", ev.message);
+   console.error("in file: ", ev.filename);
+   console.error("line: ", ev.lineno);
+};
+
+syntax.onerror = function (ev) {
+   console.error("worker error ", ev.message);
+   console.error("in file: ", ev.filename);
+   console.error("line: ", ev.lineno);
+};
 // read file by line
 // =========================================================
 // for await (const chunk of stream) {

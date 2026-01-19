@@ -11,14 +11,16 @@ self.onmessage = async (msg) => {
            ? ` ${msg.data.num}`
            : msg.data.num;
    if (linNum) {
+      procLine(lin);
       addMsg(`${linNum}: ${lin}`);
    }
    if (msg.data.done) {
+      // console.log(tokens);
+      // await Bun.write(Files.programFile, procLine(lin));
       process.exit();
       return;
    }
    // await bun. procLine(lin);
-   await Bun.write(Files.programFile, procLine(lin));
 };
 
 self.onerror = function (ev) {
@@ -27,13 +29,13 @@ self.onerror = function (ev) {
 
 const appenders = new Set(["."]);
 const starters = new Set(["<:"]);
-const tokens = [];
+let tokenNumber = 0;
 
 function procLine(lin) {
-   console.log(lin);
+   // console.log(lin);
    // const src = lin.split("").reverse();
    const src = lin.split("");
-   console.log(src);
+   // console.log(src);
    let lineNum = 0;
    let spaces = "";
    let chunk = "";
@@ -41,7 +43,6 @@ function procLine(lin) {
    let itter = 0;
    let char = 1;
    let line = 1;
-   let tokenNumber = 0;
    let lineStartPos = 1;
 
    function c() {
@@ -58,6 +59,7 @@ function procLine(lin) {
    }
 
    function skippable(str) {
+      // console.log(str);
       if (str === " " || str === "\t") {
          return "s";
       } else if (str === "\n" || str === "\r") {
@@ -67,7 +69,7 @@ function procLine(lin) {
    }
 
    function add(value, type, kind, addTok = true) {
-      tokens.push({
+      const token = {
          value,
          length: value.length,
          type,
@@ -78,14 +80,17 @@ function procLine(lin) {
          end_col: char - 1,
          token_num: addTok ? ++tokenNumber : null,
          complete: false,
-      });
+      };
+      self.postMessage(token);
    }
 
    while (itter < src.length) {
       let chunk = "";
       let usefullVar;
       chunk += c();
+      // console.log(chunk, " is keyword");
       if (isNum(chunk)) {
+         // console.log(chunk, " is keyword");
          inc();
          while (
             itter < src.length &&
@@ -97,6 +102,7 @@ function procLine(lin) {
          add(chunk, "number", "numeric_lit");
          continue;
       } else if (isAlpha(src[itter])) {
+         // console.log(chunk, " is keyword");
          inc();
          while (itter < src.length && isAlphaNum(src[itter])) {
             chunk += src[itter];
@@ -151,12 +157,13 @@ function procLine(lin) {
             char - chunk.length
          } position: ${itter}`,
       );
-      console.log("the tokens are: ", tokens);
+      // console.log("the tokens are: ", tokens);
    }
+   add(chunk, "format", "new_line");
    // console.log(tokens);
    // return tokens;
-   add("EOF", "EOF", "EOF");
-   return tokens;
+   // add("EOF", "EOF", "EOF");
+   // return tokens;
 }
 
 // while (linAr.length) {
